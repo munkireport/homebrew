@@ -10,7 +10,11 @@ if [ "$1" = 'manualcheck' ]; then
 fi
 
 # Check if homebrew is installed
-if [[ -f /usr/local/bin/brew ]]; then
+
+CURRENTUSER=$(/usr/bin/python -c 'from SystemConfiguration import SCDynamicStoreCopyConsoleUser; import sys; username = (SCDynamicStoreCopyConsoleUser(None, None, None) or [None])[0]; username = [username,""][username in [u"loginwindow", None, u""]]; sys.stdout.write(username + "\n");')
+brew=$(sudo -i -u $CURRENTUSER command -v brew)
+
+if [[ -f $brew ]]; then
 
     # Create cache dir if it does not exist
     DIR=$(dirname $0)
@@ -19,7 +23,7 @@ if [[ -f /usr/local/bin/brew ]]; then
 
     # First cd to / to get around non-existant directory error
     # The sudo is needed to escape brew.sh's UID of 0 check
-    cd /; sudo -HE -u nobody /usr/local/bin/brew info --json=v1 --installed > "${homebrewfile}"
+    cd /; sudo -HE -u nobody $brew info --json=v1 --installed > "${homebrewfile}"
 
 else
 
