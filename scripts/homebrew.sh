@@ -10,9 +10,18 @@ if [ "$1" = 'manualcheck' ]; then
 fi
 
 # Check if homebrew is installed
-
 CURRENTUSER=$(/usr/bin/python -c 'from SystemConfiguration import SCDynamicStoreCopyConsoleUser; import sys; username = (SCDynamicStoreCopyConsoleUser(None, None, None) or [None])[0]; username = [username,""][username in [u"loginwindow", None, u""]]; sys.stdout.write(username + "\n");')
-brew=$(sudo -i -u $CURRENTUSER command -v brew)
+
+if [[ $CURRENTUSER != "" ]]; then
+    brew=$(sudo -i -u $CURRENTUSER command -v brew)
+
+    if [[ $? = 1 ]]; then
+        brew="/usr/local/bin/brew"
+    fi
+else
+    brew="/usr/local/bin/brew"
+fi
+
 
 if [[ -f $brew ]]; then
 
