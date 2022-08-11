@@ -12,15 +12,21 @@ fi
 # Check if homebrew is installed
 CURRENTUSER=$(echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }')
 
-
 if [[ $CURRENTUSER != "" ]]; then
     brew=$(sudo -i -u $CURRENTUSER command -v brew)
+fi
 
-    if [[ $? = 1 ]]; then
-        brew="/usr/local/bin/brew"
+if [[ -z "$brew" ]]; then
+    arch_name="$(uname -m)"
+    if [ "${arch_name}" = "x86_64" ]; then
+        if [ "$(sysctl -in sysctl.proc_translated)" = "1" ]; then
+            brew="/opt/homebrew/bin/brew" # Running through Rosetta 2
+        else
+            brew="/usr/local/bin/brew" # Intel
+        fi 
+    elif [ "${arch_name}" = "arm64" ]; then
+        brew="/opt/homebrew/bin/brew"
     fi
-else
-    brew="/usr/local/bin/brew"
 fi
 
 
