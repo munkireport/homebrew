@@ -40,8 +40,7 @@ class Homebrew_model extends \Model {
 	}
 	
 	// ------------------------------------------------------------------------
-    
-    
+
 	/**
 	 * Process data sent by postflight
 	 *
@@ -80,7 +79,9 @@ class Homebrew_model extends \Model {
                         $this->$key = $field;
                     } else if (is_array($field) && ! in_array($key, $nestedarrays) && ! empty($field) && $key != "bottle"){
                         // If is an array and not a nested array, is not empty, and is not the bottle array, condense it to a string and save it
-                        $this->$key = implode(", ", $field);
+                        if (! count(array_filter(array_keys($field), 'is_string')) > 0){
+                            $this->$key = implode(", ", $field);
+                        }
                     } else if ($key == "requirements" && ! empty($field)){
                         // Fill out the requirements values from the requirements array
                         $requirements = "";
@@ -92,19 +93,19 @@ class Homebrew_model extends \Model {
                         // Fill out the versions_ values from the versions array
                         $this->versions_stable = $field["stable"];
                         // versions_devel is a 0/1 for false/true
-                        if ($field["devel"] != ""){
+                        if (array_key_exists("devel", $field) && $field["devel"] != ""){
                             $this->versions_devel = '1';
                         } else{
                             $this->versions_devel = '0';
                         }
                         // versions_bottle is a 0/1 for false/true
-                        if ($field["head"] == "bottle"){
+                        if (array_key_exists("head", $field) && $field["head"] == "bottle"){
                             $this->versions_bottle = '1';
                         } else{
                             $this->versions_bottle = '0';
                         }
                         // versions_head is a 0/1 for false/true
-                        if ($field["head"] == "HEAD"){
+                        if (array_key_exists("head", $field) && $field["head"] == "HEAD"){
                             $this->versions_head = '1';
                         } else{
                             $this->versions_head = '0';
