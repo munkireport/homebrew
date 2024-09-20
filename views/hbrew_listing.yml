@@ -1,0 +1,22 @@
+i18n_title: homebrew.reporttitle
+not_null_column: homebrew.full_name
+table:
+  - column: machine.computer_name
+    i18n_header: listing.computername
+    formatter: clientDetail
+    tab_link: homebrew-tab
+  - column: reportdata.serial_number
+    i18n_header: serial
+  - {i18n_header: homebrew.full_name, column: homebrew.full_name}
+  - {i18n_header: homebrew.install_time, column: homebrew.install_time, formatter: timestampToMoment}
+  - {i18n_header: homebrew.installed_version, column: homebrew.installed_version}
+  - {i18n_header: homebrew.versions_stable, column: homebrew.versions_stable}
+  - {i18n_header: homebrew.outdated, column: homebrew.outdated, formatter: binaryYesNo}
+  - {i18n_header: homebrew.linked_keg, column: homebrew.linked_keg}
+  - {i18n_header: homebrew.built_as_bottle, column: homebrew.built_as_bottle, formatter: binaryYesNo}
+  - {i18n_header: homebrew.installed_as_dependency, column: homebrew.installed_as_dependency, formatter: binaryYesNo}
+  - {i18n_header: homebrew.installed_on_request, column: homebrew.installed_on_request, formatter: binaryYesNo}
+  - {i18n_header: homebrew.poured_from_bottle, column: homebrew.poured_from_bottle, formatter: binaryYesNo}
+  - {i18n_header: homebrew.deprecated, column: homebrew.deprecated, formatter: binaryYesNo}
+  - {i18n_header: homebrew.deprecation_date, column: homebrew.deprecation_date}
+  

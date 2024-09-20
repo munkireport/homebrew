@@ -1,0 +1,9 @@
+client_tabs:
+    homebrew-tab:
+        view: homebrew
+        i18n: homebrew.clienttitle
+        badge: homebrew-cnt
+listings:
+    homebrew:
+        view: hbrew_listing
+        i18n: homebrew.clienttitle

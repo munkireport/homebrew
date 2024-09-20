@@ -1,62 +1,73 @@
 <?php
+
+use CFPropertyList\CFPropertyList;
+
 class Homebrew_model extends \Model {
 
-	function __construct($serial='')
-	{
-		parent::__construct('id', 'homebrew'); //primary key, tablename
-		$this->rs['id'] = '';
-		$this->rs['serial_number'] = $serial;
-		$this->rs['name'] = '';
-		$this->rs['full_name'] = '';
-		$this->rs['oldname'] = '';
-		$this->rs['aliases'] = '';
-		$this->rs['desc'] = '';
-		$this->rs['homepage'] = '';
-		$this->rs['installed_versions'] = '';
-		$this->rs['versions_stable'] = '';
-		$this->rs['linked_keg'] = '';  
-		$this->rs['dependencies'] = '';
-		$this->rs['build_dependencies'] = '';
-		$this->rs['recommended_dependencies'] = '';
-		$this->rs['runtime_dependencies'] = '';
-		$this->rs['optional_dependencies'] = '';
-		$this->rs['requirements'] = '';
-		$this->rs['options'] = '';
-		$this->rs['used_options'] = '';
-		$this->rs['caveats'] = '';
-		$this->rs['conflicts_with'] = '';
-		$this->rs['built_as_bottle'] = 0; //TF
-		$this->rs['installed_as_dependency'] = 0; //TF
-		$this->rs['installed_on_request'] = 0; //TF
-		$this->rs['poured_from_bottle'] = 0; //TF
-		$this->rs['versions_bottle'] = 0; //TF
-		$this->rs['keg_only'] = 0; //TF
-		$this->rs['outdated'] = 0; //TF
-		$this->rs['pinned'] = 0; //TF
-		$this->rs['versions_devel'] = 0; //TF
-		$this->rs['versions_head'] = 0; //TF
+    function __construct($serial='')
+    {
+        parent::__construct('id', 'homebrew'); // Primary key, tablename
+        $this->rs['id'] = '';
+        $this->rs['serial_number'] = $serial;
+        $this->rs['name'] = '';
+        $this->rs['full_name'] = '';
+        $this->rs['oldname'] = null;
+        $this->rs['aliases'] = null;
+        $this->rs['desc'] = null;
+        $this->rs['homepage'] = null;
+        $this->rs['installed_versions'] = null;
+        $this->rs['versions_stable'] = null;
+        $this->rs['linked_keg'] = null;  
+        $this->rs['dependencies'] = null;
+        $this->rs['build_dependencies'] = null;
+        $this->rs['recommended_dependencies'] = null;
+        $this->rs['runtime_dependencies'] = null;
+        $this->rs['optional_dependencies'] = null;
+        $this->rs['requirements'] = null;
+        $this->rs['options'] = null;
+        $this->rs['used_options'] = null;
+        $this->rs['caveats'] = null;
+        $this->rs['conflicts_with'] = null;
+        $this->rs['built_as_bottle'] = 0; //TF
+        $this->rs['installed_as_dependency'] = null; //TF
+        $this->rs['installed_on_request'] = null; //TF
+        $this->rs['poured_from_bottle'] = null; //TF
+        $this->rs['versions_bottle'] = null; //TF
+        $this->rs['keg_only'] = null; //TF
+        $this->rs['outdated'] = null; //TF
+        $this->rs['pinned'] = null; //TF
+        $this->rs['versions_devel'] = null; //TF
+        $this->rs['versions_head'] = null; //TF
+        $this->rs['brew_json'] = null;
+        $this->rs['deprecated'] = null; //TF
+        $this->rs['deprecation_date'] = null;
+        $this->rs['deprecation_reason'] = null;
+        $this->rs['install_time'] = null;
+        $this->rs['installed_version'] = null;
 
-		$this->serial_number = $serial;
-	}
-	
-	// ------------------------------------------------------------------------
+        $this->serial_number = $serial;
+    }
 
-	/**
-	 * Process data sent by postflight
-	 *
-	 * @param string data
-	 * @author tuxudo
-	 **/
-	function process($json)
-	{        
-		// Check if data was uploaded
-		if ( $json ){
-					
-            // Delete previous set        
+    // ------------------------------------------------------------------------
+
+    /**
+     * Process data sent by postflight
+     *
+     * @param string data
+     * @author tuxudo
+     **/
+    function process($data)
+    {
+         // Check if data was uploaded
+        if (! $data) {
+            throw new Exception("Error Processing homebrew Module Request: No data found", 1);
+        } else if (substr( $data, 0, 30 ) != '<?xml version="1.0" encoding="' ) { // Else if old style json, process with old json based handler
+
+            // Delete previous set
             $this->deleteWhere('serial_number=?', $this->serial_number);
 
             // Process json into object thingy
-            $brews = json_decode($json, true);
+            $brews = json_decode($data, true);
 
             $booleans = array('built_as_bottle','installed_as_dependency','installed_on_request','poured_from_bottle','keg_only','outdated','pinned','versions_bottle','versions_head');
 
@@ -150,7 +161,7 @@ class Homebrew_model extends \Model {
                             $this->poured_from_bottle = '1';
                         } else{
                             $this->poured_from_bottle = '0';
-                        }                       
+                        }
                         // runtime_dependencies
                         if (array_key_exists("runtime_dependencies", $newestinstall)) {
                             if ($newestinstall["runtime_dependencies"] != null){
@@ -163,13 +174,12 @@ class Homebrew_model extends \Model {
                         }
 
                     } else if ($key == "options" && ! empty($field)){
-                    // options
-                    $options = "";
-                    foreach ($field as $option){
-                        $options .= $option["option"]." (".$option["description"]."), ";
-                    }
-                    $this->options = trim($options, ", ");
-
+                        // options
+                        $options = "";
+                        foreach ($field as $option){
+                            $options .= $option["option"]." (".$option["description"]."), ";
+                        }
+                        $this->options = trim($options, ", ");
 
                     } else if ($field == "0" && ! is_array($field)){
                         // Set the value to 0 if it's 0
@@ -178,11 +188,42 @@ class Homebrew_model extends \Model {
                         // Else, null the value
                         $this->$key = '';   
                     }
-                }
-                // Save the bottles
-                $this->id = '';
-                $this->save();
+                    // }
+                    // Save the bottles
+                    $this->id = '';
+                    $this->save();
                 }
             }
-		}
-	}
+        } else { // Else process with new XML handler 
+
+            // Process incoming hombrew_info.plist
+            $parser = new CFPropertyList();
+            $parser->parse($data, CFPropertyList::FORMAT_XML);
+            $plist = $parser->toArray();
+
+            // Delete previous set
+            $this->deleteWhere('serial_number=?', $this->serial_number);
+
+            // Process each homebrew thing
+            foreach ($plist as $brew) {
+
+                // Add the serial number to each entry
+                $brew['serial_number'] = $this->serial_number;
+
+                foreach ($this->rs as $key => $value){
+                    // If key does not exist in $brew, null it
+                    if ( ! array_key_exists($key, $brew) || $brew[$key] == '' && $brew[$key] != '0') {
+                        $this->rs[$key] = null;
+                    // Set the db fields to be the same as those in the brew file
+                    } else {
+                        $this->rs[$key] = $brew[$key];
+                    }
+                }
+
+                // Save the bottles of cider Mmmmmm tasty
+                $this->id = '';
+                $this->save();
+            }
+        }
+    }
+}

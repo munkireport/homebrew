@@ -30,5 +30,10 @@
     "versions_stable": "Stable Version",
     "versions_devel": "Development Version Available",
     "versions_bottle": "Bottle Available",
-    "versions_head": "Head Available"
+    "versions_head": "Head Available",
+    "deprecated": "Deprecated",
+    "deprecation_date": "Deprecation Date",
+    "deprecation_reason": "Deprecation Reason",
+    "install_time": "Install Time",
+    "installed_version": "Version Installed"
 }
