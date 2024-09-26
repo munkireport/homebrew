@@ -14,7 +14,7 @@ def get_brew_info(brew):
     cachedir = '%s/cache' % os.path.dirname(os.path.realpath(__file__))
 
     # We need this awful, ugly workaround because homebrew is evil when it comes to scripting as `root`
-    os.system("cd "+cachedir+"; /usr/bin/sudo -HE -u "+homebrew_owner+" "+brew+" info --json=v1 --installed > homebrew.json")
+    os.system("/usr/bin/sudo -HE -u "+homebrew_owner+" "+brew+" info --json=v1 --installed > "+cachedir+"/homebrew.json")
 
     # Load the homebrew json
     homebrew_json = json.loads(open(cachedir+"/homebrew.json", 'r').read().strip())
@@ -42,9 +42,16 @@ def get_brew_info(brew):
         if "optional_dependencies" in brew and len(brew["optional_dependencies"]) > 0: # Array to string
             bottle["optional_dependencies"] = ', '.join(brew["optional_dependencies"])
         if "requirements" in brew and len(brew["requirements"]) > 0: # Array to string
-            bottle["requirements"] = ', '.join(brew["requirements"])
-        if "options" in brew and len(brew["options"]) > 0: # Array to string
-            bottle["options"] = ', '.join(brew["options"])
+            requirements = []
+            for requirement in brew["requirements"]:
+                if "name" in requirement:
+                    requirements.append(requirement["name"])
+            bottle["requirements"] = ', '.join(requirements)
+        try:
+            if "options" in brew and len(brew["options"]) > 0: # Array to string
+                bottle["options"] = ', '.join(brew["options"])
+        except:
+            pass
         if "conflicts_with" in brew and len(brew["conflicts_with"]) > 0: # Array to string
             bottle["conflicts_with"] = ', '.join(brew["conflicts_with"])
 
@@ -82,9 +89,9 @@ def get_brew_info(brew):
             if "poured_from_bottle" in newest_install:
                 bottle["newest_install"] = to_bool(newest_install["poured_from_bottle"]) # Boolean
             if "time" in newest_install:
-                bottle["install_time"] = str(newest_install["time"])
+                bottle["install_time"] = str(newest_install["time"]) #####
             if "version" in newest_install:
-                bottle["installed_version"] = newest_install["version"]
+                bottle["installed_version"] = str(newest_install["version"]) #####
 
             if "used_options" in newest_install and len(newest_install["used_options"]) > 0: # Array to string
                 bottle["used_options"] = ', '.join(newest_install["used_options"])
