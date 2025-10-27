@@ -28,6 +28,7 @@ def get_brew_info(brew):
 
             if "name" in brew and isinstance(brew["name"], list):
                 cask["name"] = ''.join(brew["name"])
+                cask["full_name"] = ''.join(brew["name"])
             elif "name" in brew:
                 cask["name"] = brew["name"]
 
